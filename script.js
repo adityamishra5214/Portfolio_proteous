@@ -104,7 +104,7 @@ const brands = [{ "name": "Avni Wellness", "key": "avni", "short": "AW", "fy25":
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 /* --- SECURITY & PASSCODE GATE CONTROLLER --- */
-(function setupSecurityGate() {
+function setupSecurityGate() {
   const VALID_PASSWORDS = ['proteus', 'proteus2026', 'proteus123', 'partner', 'partners'];
   
   const gateOverlay = document.getElementById('gateOverlay');
@@ -123,12 +123,20 @@ const brands = [{ "name": "Avni Wellness", "key": "avni", "short": "AW", "fy25":
 
   function applyLockState() {
     if (isUnlocked()) {
-      if (gateOverlay) gateOverlay.classList.add('hidden');
+      if (gateOverlay) {
+        gateOverlay.classList.add('hidden');
+        gateOverlay.style.display = 'none';
+      }
       if (pageMain) pageMain.classList.remove('locked');
+      document.body.style.overflow = '';
     } else {
-      if (gateOverlay) gateOverlay.classList.remove('hidden');
+      if (gateOverlay) {
+        gateOverlay.classList.remove('hidden');
+        gateOverlay.style.display = 'flex';
+      }
       if (pageMain) pageMain.classList.add('locked');
-      if (gatePass) setTimeout(() => gatePass.focus(), 300);
+      document.body.style.overflow = 'hidden';
+      if (gatePass) setTimeout(() => gatePass.focus(), 200);
     }
   }
 
@@ -137,7 +145,8 @@ const brands = [{ "name": "Avni Wellness", "key": "avni", "short": "AW", "fy25":
 
   // Password toggle
   if (eyeBtn && gatePass) {
-    eyeBtn.addEventListener('click', () => {
+    eyeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       const type = gatePass.getAttribute('type') === 'password' ? 'text' : 'password';
       gatePass.setAttribute('type', type);
       eyeBtn.textContent = type === 'password' ? '👁️' : '🙈';
@@ -148,7 +157,7 @@ const brands = [{ "name": "Avni Wellness", "key": "avni", "short": "AW", "fy25":
   if (gateForm) {
     gateForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const inputVal = (gatePass.value || '').trim().toLowerCase();
+      const inputVal = (gatePass ? gatePass.value : '').trim().toLowerCase();
       
       if (VALID_PASSWORDS.includes(inputVal)) {
         sessionStorage.setItem('proteus_unlocked', 'true');
@@ -162,8 +171,10 @@ const brands = [{ "name": "Avni Wellness", "key": "avni", "short": "AW", "fy25":
           void gateCard.offsetWidth; // trigger reflow
           gateCard.classList.add('shake');
         }
-        gatePass.value = '';
-        gatePass.focus();
+        if (gatePass) {
+          gatePass.value = '';
+          gatePass.focus();
+        }
       }
     });
   }
@@ -189,7 +200,7 @@ const brands = [{ "name": "Avni Wellness", "key": "avni", "short": "AW", "fy25":
     }, 3200);
   }
 
-  /* --- ANTI-INSPECTION & DEVTOOLS PROTECTIONS --- */
+  /* --- ANTI-INSPECTION & SHORTCUT PROTECTIONS --- */
 
   // 1. Disable Right Click Context Menu
   document.addEventListener('contextmenu', (e) => {
@@ -225,15 +236,11 @@ const brands = [{ "name": "Avni Wellness", "key": "avni", "short": "AW", "fy25":
       return false;
     }
   });
+}
 
-  // 3. Continuous Debugger Trap when unauthenticated
-  setInterval(() => {
-    if (!isUnlocked()) {
-      (function () {
-        return false;
-      })
-      .constructor('debugger')();
-    }
-  }, 1000);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupSecurityGate);
+} else {
+  setupSecurityGate();
+}
 
-})();
