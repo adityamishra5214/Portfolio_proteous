@@ -102,3 +102,138 @@ const brands = [{ "name": "Avni Wellness", "key": "avni", "short": "AW", "fy25":
     window.addEventListener('resize', positionCard);
     window.addEventListener('scroll', positionCard, { passive: true });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* --- SECURITY & PASSCODE GATE CONTROLLER --- */
+(function setupSecurityGate() {
+  const VALID_PASSWORDS = ['proteus', 'proteus2026', 'proteus123', 'partner', 'partners'];
+  
+  const gateOverlay = document.getElementById('gateOverlay');
+  const gateForm = document.getElementById('gateForm');
+  const gatePass = document.getElementById('gatePass');
+  const eyeBtn = document.getElementById('eyeBtn');
+  const gateError = document.getElementById('gateError');
+  const gateCard = document.querySelector('.gate-card');
+  const pageMain = document.querySelector('.page');
+  const lockBtn = document.getElementById('lockBtn');
+  const secToast = document.getElementById('secToast');
+
+  function isUnlocked() {
+    return sessionStorage.getItem('proteus_unlocked') === 'true';
+  }
+
+  function applyLockState() {
+    if (isUnlocked()) {
+      if (gateOverlay) gateOverlay.classList.add('hidden');
+      if (pageMain) pageMain.classList.remove('locked');
+    } else {
+      if (gateOverlay) gateOverlay.classList.remove('hidden');
+      if (pageMain) pageMain.classList.add('locked');
+      if (gatePass) setTimeout(() => gatePass.focus(), 300);
+    }
+  }
+
+  // Initial check
+  applyLockState();
+
+  // Password toggle
+  if (eyeBtn && gatePass) {
+    eyeBtn.addEventListener('click', () => {
+      const type = gatePass.getAttribute('type') === 'password' ? 'text' : 'password';
+      gatePass.setAttribute('type', type);
+      eyeBtn.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+  }
+
+  // Submit password
+  if (gateForm) {
+    gateForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const inputVal = (gatePass.value || '').trim().toLowerCase();
+      
+      if (VALID_PASSWORDS.includes(inputVal)) {
+        sessionStorage.setItem('proteus_unlocked', 'true');
+        if (gateError) gateError.textContent = '';
+        applyLockState();
+        showSecToast('🔓 Access Granted. Portfolio Unlocked.');
+      } else {
+        if (gateError) gateError.textContent = '❌ Access Denied: Incorrect Password';
+        if (gateCard) {
+          gateCard.classList.remove('shake');
+          void gateCard.offsetWidth; // trigger reflow
+          gateCard.classList.add('shake');
+        }
+        gatePass.value = '';
+        gatePass.focus();
+      }
+    });
+  }
+
+  // Lock button in topbar
+  if (lockBtn) {
+    lockBtn.addEventListener('click', () => {
+      sessionStorage.removeItem('proteus_unlocked');
+      applyLockState();
+      showSecToast('🔒 Portfolio Locked.');
+    });
+  }
+
+  // Security Toast Trigger
+  let toastTimer = null;
+  function showSecToast(msg) {
+    if (!secToast) return;
+    secToast.textContent = msg;
+    secToast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      secToast.classList.remove('show');
+    }, 3200);
+  }
+
+  /* --- ANTI-INSPECTION & DEVTOOLS PROTECTIONS --- */
+
+  // 1. Disable Right Click Context Menu
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    showSecToast('🔒 Security Notice: Right-click context menu is disabled.');
+    return false;
+  });
+
+  // 2. Disable DevTools Keyboard Shortcuts
+  document.addEventListener('keydown', (e) => {
+    // F12 key
+    if (e.keyCode === 123) {
+      e.preventDefault();
+      showSecToast('🔒 Security Notice: F12 inspection shortcut is disabled.');
+      return false;
+    }
+    // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
+    if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+      e.preventDefault();
+      showSecToast('🔒 Security Notice: DevTools inspection shortcuts are disabled.');
+      return false;
+    }
+    // Ctrl+U (View Source)
+    if (e.ctrlKey && e.keyCode === 85) {
+      e.preventDefault();
+      showSecToast('🔒 Security Notice: View Source is disabled.');
+      return false;
+    }
+    // Ctrl+S (Save Page)
+    if (e.ctrlKey && e.keyCode === 83) {
+      e.preventDefault();
+      showSecToast('🔒 Security Notice: Saving page is disabled.');
+      return false;
+    }
+  });
+
+  // 3. Continuous Debugger Trap when unauthenticated
+  setInterval(() => {
+    if (!isUnlocked()) {
+      (function () {
+        return false;
+      })
+      .constructor('debugger')();
+    }
+  }, 1000);
+
+})();
