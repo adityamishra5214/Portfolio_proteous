@@ -485,7 +485,8 @@
     .pop-chart svg {
       width: 100%;
       height: 150px;
-      display: block
+      display: block;
+      overflow: visible;
     }
 
     .pop-note {
