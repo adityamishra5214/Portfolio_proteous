@@ -8,6 +8,7 @@ const brands = [{"name":"Avni Wellness","key":"avni","short":"AW","fy25":2.85,"f
     let activeOrb = null;
 
     function money(n) { return '₹' + Number(n).toFixed(2) + ' Cr'; }
+    function percent(n) { return Number(n).toFixed(2) + '%'; }
     function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
 
     function drawChart(b) {
@@ -67,8 +68,8 @@ const brands = [{"name":"Avni Wellness","key":"avni","short":"AW","fy25":2.85,"f
       document.getElementById('popName').textContent = b.name;
       document.getElementById('popVal').textContent = money(b.valuation);
       document.getElementById('popRev').textContent = money(b.totalRevenue);
-      document.getElementById('popGrowth').textContent = (b.growth !== undefined && b.growth !== null) ? b.growth + '%' : '0%';
-      document.getElementById('popEbitda').textContent = (b.ebitdaMargin !== undefined && b.ebitdaMargin !== null) ? b.ebitdaMargin + '%' : '0%';
+      document.getElementById('popGrowth').textContent = (b.growth !== undefined && b.growth !== null) ? percent(b.growth) : '0.00%';
+      document.getElementById('popEbitda').textContent = (b.ebitdaMargin !== undefined && b.ebitdaMargin !== null) ? percent(b.ebitdaMargin) : '0.00%';
       document.getElementById('popNote').textContent = `FY25: ${money(b.fy25)} · FY26: ${money(b.fy26)} · FY27 (Proj): ${money(b.fy27)}`;
       const foundersHtml = (b.founders || []).map(f =>
         `<div class="founder"><img src="${f.photo}" alt="${f.name}"><span>${f.name}</span></div>`
