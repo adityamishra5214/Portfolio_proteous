@@ -11,6 +11,20 @@ const brands = [{"name":"Avni Wellness","key":"avni","short":"AW","fy25":2.85,"f
     function percent(n) { return Number(n).toFixed(2) + '%'; }
     function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
 
+    function updateFooterTotals() {
+      const revEl = document.getElementById('proteusTotalRevenue');
+      const valEl = document.getElementById('proteusTotalVal');
+      if (revEl) {
+        const sumFy27 = brands.reduce((sum, b) => sum + (Number(b.fy27) || 0), 0);
+        revEl.textContent = money(sumFy27);
+      }
+      if (valEl) {
+        const sumVal = brands.reduce((sum, b) => sum + (Number(b.valuation) || 0), 0);
+        valEl.textContent = money(sumVal);
+      }
+    }
+    updateFooterTotals();
+
     function drawChart(b) {
       const svg = document.getElementById('popSvg');
       const values = [b.fy25, b.fy26, b.fy27];
