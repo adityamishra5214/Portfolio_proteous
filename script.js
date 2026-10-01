@@ -233,12 +233,9 @@ function selectCompany(companyKey) {
   const data = portfolioData.find(b => b.key === companyKey);
   if (!data) return;
 
-  // 1. Update Inspector Title & Subhead
+  // 1. Update Inspector Title
   const titleEl = document.getElementById('inspector-title');
   if (titleEl) titleEl.textContent = data.title || data.name;
-
-  const categoryEl = document.getElementById('inspector-category');
-  if (categoryEl) categoryEl.textContent = data.category;
 
   // 2. Update Inspector Logo
   const logoContainer = document.getElementById('inspector-logo-container');
