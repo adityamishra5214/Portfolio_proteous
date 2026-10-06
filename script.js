@@ -325,7 +325,12 @@ function selectCompany(companyKey) {
 
 // Security Gate Controller
 function setupSecurityGate() {
-  const VALID_PASSWORDS = ['proteus', 'proteus2026', 'proteus123', 'partner', 'partners', 'admin'];
+  const VALID_PASSWORDS = [
+    'Proteus@2026#Secure!',
+    'Proteus#Capital2026!',
+    'Proteus@CoOps#2026!',
+    'Proteus2026#Admin!'
+  ];
 
   const gateOverlay = document.getElementById('gateOverlay');
   const gateForm = document.getElementById('gateForm');
@@ -379,7 +384,7 @@ function setupSecurityGate() {
   if (gateForm) {
     gateForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const inputVal = (gatePass ? gatePass.value : '').trim().toLowerCase();
+      const inputVal = (gatePass ? gatePass.value : '').trim();
 
       if (VALID_PASSWORDS.includes(inputVal)) {
         sessionStorage.setItem('proteus_unlocked', 'true');
